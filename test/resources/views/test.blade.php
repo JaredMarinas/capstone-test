@@ -183,13 +183,64 @@
         <p class="text-lg font-semibold mt-5 text-[#CECBF6]">Dela Cruz</p>
         <p class="text-md font-semibold text-[#CECBF6]/75">500 XP</p>
     </div>
-
-    <div>
-    
-    </div>
-
   </div>
 
+  <div class="w-[80%] h-auto md:w-[60%] text-[#CECBF6] flex flex-row border-2 rounded-lg border-[#CECBF6]/15 bg-[#CECBF6]/6">
+
+    <div class=" w-[50%] flex flex-col mt-2 items-center">
+        <p class="md:text-xl text-lg">Student</p>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2 md:mt-5">
+            <p class="text-lg font-semibold md:text-2xl">John Doe</p>
+        </div>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2">
+            <p class="text-lg font-semibold md:text-2xl">Juan Ponce</p>
+        </div>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2">
+            <p class="text-lg font-semibold md:text-2xl">Dela Cruz</p>
+        </div>
+    </div>
+
+    <div class=" w-[50%] flex flex-col mt-2 items-center">
+        <p class="md:text-xl text-lg">XP</p>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2 md:mt-5">
+            <p class="text-lg font-semibold md:text-2xl">100 XP</p>
+        </div>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2">
+            <p class="text-lg font-semibold md:text-2xl ">50 XP</p>
+        </div>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2">
+            <p class="text-lg font-semibold md:text-2xl ">25 XP</p>
+            </div>
+
+    </div>
+
+    <div class=" w-[50%] flex flex-col mt-2 items-center">
+        <p class="md:text-xl text-lg">Rank</p>
+        <div class="flex flex-row justify-center items-center gap-2 mt-2">
+            <p class="text-lg font-semibold md:text-2xl">Martial</p>
+        </div>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2">
+            <p class="text-lg font-semibold md:text-2xl">Apprentice</p>
+        </div>
+
+        <div class="flex flex-row justify-center items-center gap-2 mt-2">
+            <p class="text-lg font-semibold md:text-2xl">Novice</p>
+            </div>
+
+    </div>
+    
+
+    
+  </div>
+
+  
 </main>
     </body>
 </html>
