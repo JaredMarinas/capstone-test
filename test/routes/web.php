@@ -7,7 +7,9 @@ Route::get('/', function () {
     return view('test');
 });
 
-Route::post('/compile', [CompilerController::class, 'compile']);
+Route::get('/compiler', [CompilerController::class, 'index']);
+Route::post('/run-code', [CompilerController::class, 'run']);
+
 Route::get('/compiler', function () {
     return view('compiler');
 });

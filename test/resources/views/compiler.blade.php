@@ -1,117 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laravel Compiler Test</title>
-    <!-- Include Tailwind CSS for quick styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Code Terminal</title>
+    
+    <!-- REQUIRED: CodeMirror core CSS and Theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-100 h-screen flex flex-col font-sans">
-
-    <!-- Top Header Navigation Bar -->
-    <header class="bg-slate-800 text-white p-4 flex justify-between items-center shadow">
-        <h1 class="text-xl font-bold">🛠️ Laravel Piston Compiler Test</h1>
-        <div class="flex items-center gap-4">
-            <select id="languageSelect" class="bg-slate-700 text-white px-3 py-1.5 rounded border border-slate-600 focus:outline-none">
-                <option value="cpp">C++</option>
-                <option value="c">C</option>
-                <option value="java">Java</option>
-                <option value="go">Go</option>
-                <option value="rust">Rust</option>
-                <option value="csharp">C#</option>
-            </select>
-            <button id="runBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-1.5 rounded transition">Run Code ▶</button>
+<body class="bg-[#050505] text-[#CECBF6] font-mono m-0 p-5">
+    <div class="flex gap-4 h-[90vh]">
+        
+        <div class="flex-1 bg-transparent border border-[#CECBF6]/15 rounded-lg p-5 flex flex-col [&>.CodeMirror]:grow [&>.CodeMirror]:rounded [&>.CodeMirror]:text-[16px] [&>.CodeMirror]:h-auto">
+            <div class="flex gap-2.5 mb-[15px]">
+                <select id="languageSelect" onchange="changeLanguage()" class="bg-transparent text-[#CECBF6] border border-[#CECBF6]/15 px-5 py-2.5 uppercase font-bold rounded cursor-pointer transition-all duration-200 outline-none focus:bg-[#CECBF6] focus:text-black focus:shadow-[0_0_15px_rgba(206,203,246,0.8)]">
+                    <option value="java" data-mode="text/x-java">Java</option>
+                    <option value="python" data-mode="text/x-python">Python</option>
+                    <option value="csharp" data-mode="text/x-csharp">C#</option>
+                </select>
+                <button class="bg-transparent text-[#CECBF6] border border-[#CECBF6]/15 px-5 py-2.5 uppercase font-bold rounded cursor-pointer transition-all duration-200 hover:bg-[#CECBF6] hover:text-black hover:shadow-[0_0_15px_rgba(206,203,246,0.8)]" onclick="runCode()">Execute Script</button>
+            </div>
+            <textarea id="code"></textarea>
         </div>
-    </header>
-
-    <!-- Main Workspace Area -->
-    <main class="flex-1 flex overflow-hidden">
-        <!-- Left Pane: Code Input Area -->
-        <div class="w-1/2 p-4 flex flex-col border-r border-gray-300">
-            <label class="text-sm font-semibold text-gray-700 mb-2">Write Code Here:</label>
-            <textarea id="codeEditor" class="flex-1 p-4 bg-slate-900 text-gray-100 font-mono text-sm rounded resize-none focus:outline-none shadow-inner" spellcheck="false">#include <iostream>
-
-int main() {
-    std::cout << "Hello from C++ inside Laravel!" << std::endl;
-    return 0;
-}</textarea>
+        
+        <div class="flex-1 bg-transparent border border-[#CECBF6]/15 rounded-lg p-5 flex flex-col">
+            <h3 class="mt-0 uppercase tracking-[2px] font-bold mb-4">Terminal Output</h3>
+            <div class="grow bg-black text-[#CECBF6] p-[15px] rounded border border-[#333] overflow-y-auto whitespace-pre-wrap" id="output">// Awaiting execution...</div>
         </div>
+    </div>
 
-        <!-- Right Pane: Terminal Output Area -->
-        <div class="w-1/2 p-4 flex flex-col bg-slate-950 text-emerald-400 font-mono text-sm">
-            <label class="text-sm font-semibold text-gray-400 mb-2">Terminal Output:</label>
-            <div id="terminal" class="flex-1 p-4 bg-black rounded overflow-y-auto whitespace-pre-wrap">Click "Run Code" to compile and see output...</div>
-        </div>
-    </main>
-
-    <!-- JavaScript Execution Logic -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    
     <script>
-        // Preset boilerplates for languages to make testing easier
-        const boilerplates = {
-            cpp: `#include <iostream>\n\nint main() {\n    std::cout << "Hello from C++ inside Laravel!" << std::endl;\n    return 0;\n}`,
-            c: `#include <stdio.h>\n\nint main() {\n    printf("Hello from C inside Laravel!\\n");\n    return 0;\n}`,
-            java: `public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello from Java inside Laravel!");\n    }\n}`,
-            go: `package main\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from Go inside Laravel!")\n}`,
-            rust: `fn main() {\n    println!("Hello from Rust inside Laravel!");\n}`,
-            csharp: `using System;\n\nclass MainClass {\n    static void Main() {\n        Console.WriteLine("Hello from C# inside Laravel!");\n    }\n}`
+        const templates = {
+            java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("System activated.");\n    }\n}',
+            python: 'print("System activated.")',
+            csharp: 'using System;\nclass Program {\n    static void Main() {\n        Console.WriteLine("System activated.");\n    }\n}'
         };
 
-        const languageSelect = document.getElementById('languageSelect');
-        const codeEditor = document.getElementById('codeEditor');
-        const runBtn = document.getElementById('runBtn');
-        const terminal = document.getElementById('terminal');
-
-        // Swap template code when the selected language drops down
-        languageSelect.addEventListener('change', (e) => {
-            codeEditor.value = boilerplates[e.target.value] || '';
+        var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+            mode: "text/x-java",
+            theme: "dracula",
+            lineNumbers: true
         });
+        
+        editor.setValue(templates.java);
 
-        // Trigger code execution via API request
-        runBtn.addEventListener('click', async () => {
-            terminal.innerText = "Compiling and running code...";
-            runBtn.disabled = true;
-            runBtn.innerText = "Running...";
+        function changeLanguage() {
+            const select = document.getElementById("languageSelect");
+            const selectedOption = select.options[select.selectedIndex];
+            const lang = select.value;
+            
+            editor.setOption("mode", selectedOption.getAttribute("data-mode"));
+            editor.setValue(templates[lang]); 
+        }
+
+        async function runCode() {
+            const outputDiv = document.getElementById('output');
+            const selectedLanguage = document.getElementById('languageSelect').value;
+            
+            outputDiv.style.color = "#ff0";
+            outputDiv.innerText = "> Compiling and executing...";
 
             try {
-                const response = await fetch('/compile', {
+                const response = await fetch('/run-code', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({
-                        language: languageSelect.value,
-                        code: codeEditor.value
+                    body: JSON.stringify({ 
+                        code: editor.getValue(), 
+                        language: selectedLanguage 
                     })
                 });
 
                 const data = await response.json();
-                runBtn.disabled = false;
-                runBtn.innerText = "Run Code ▶";
-
-                if (data.success) {
-                    // Display compiler errors if stdout is completely empty but stderr has info
-                    if (!data.stdout && data.stderr) {
-                        terminal.className = "flex-1 p-4 bg-black rounded overflow-y-auto whitespace-pre-wrap text-red-400";
-                        terminal.innerText = data.stderr;
-                    } else {
-                        // Print ordinary execution standard output
-                        terminal.className = "flex-1 p-4 bg-black rounded overflow-y-auto whitespace-pre-wrap text-emerald-400";
-                        terminal.innerText = data.stdout + (data.stderr ? `\n\n[Errors]:\n${data.stderr}` : '');
-                    }
-                } else {
-                    terminal.className = "flex-1 p-4 bg-black rounded overflow-y-auto whitespace-pre-wrap text-red-500 font-bold";
-                    terminal.innerText = `Error: ${data.error || 'Something went wrong.'}`;
-                }
-            } catch (error) {
-                runBtn.disabled = false;
-                runBtn.innerText = "Run Code ▶";
-                terminal.className = "flex-1 p-4 bg-black rounded overflow-y-auto whitespace-pre-wrap text-red-500 font-bold";
-                terminal.innerText = `Network Error: Unable to communicate with backend.`;
-                console.error(error);
+                outputDiv.style.color = data.error ? "#f00" : "#0f0";
+                outputDiv.innerText = data.output || data.error || "Execution completed with no output.";
+            } catch (e) {
+                outputDiv.style.color = "#f00";
+                outputDiv.innerText = "Network error. Server unreachable.";
             }
-        });
+        }
     </script>
 </body>
 </html>
